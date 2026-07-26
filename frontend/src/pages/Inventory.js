@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
 import Sidebar from "../components/Sidebar";
+import InventoryForm from "../components/InventoryForm";
+import InventoryTable from "../components/InventoryTable";
+import DashboardCard from "../components/DashboardCard";
 import api from "../services/api";
 
 function Inventory() {
@@ -13,6 +16,7 @@ const [purchase_price, setPurchasePrice] = useState("");
 const [selling_price, setSellingPrice] = useState("");
 const [supplier_name, setSupplierName] = useState("");
 const [reorder_level, setReorderLevel] = useState("");
+const [editingId, setEditingId] = useState(null);
   useEffect(() => {
     fetchInventory();
   }, []);
@@ -53,6 +57,79 @@ const addInventory = async () => {
         console.log(error);
     }
 };
+
+const deleteInventory = async (id) => {
+  try {
+    await api.delete(`/inventory/${id}`);
+
+    fetchInventory();
+
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const editInventory = (item) => {
+  setEditingId(item.id);
+
+  setItemName(item.item_name);
+  setCategory(item.category);
+  setQuantity(item.quantity);
+  setUnit(item.unit);
+  setPurchasePrice(item.purchase_price);
+  setSellingPrice(item.selling_price);
+  setSupplierName(item.supplier);
+  setReorderLevel(item.reorder_level);
+  
+};   // <-- THIS LINE MUST EXIST
+
+const updateInventory = async () => {
+  try {
+    await api.put(`/inventory/${editingId}`, {
+      item_name,
+      category,
+      quantity,
+      unit,
+      purchase_price,
+      selling_price,
+      supplier: supplier_name,
+      reorder_level,
+    });
+
+    fetchInventory();
+
+    setItemName("");
+    setCategory("");
+    setQuantity("");
+    setUnit("");
+    setPurchasePrice("");
+    setSellingPrice("");
+    setSupplierName("");
+    setReorderLevel("");
+    setEditingId(null);
+
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+// Dashboard calculations
+const totalItems = items.length;
+
+const lowStockItems = items.filter(
+  (item) => Number(item.quantity) <= Number(item.reorder_level)
+).length;
+
+const totalCategories = new Set(
+  items.map((item) => item.category)
+).size;
+
+const totalStockValue = items.reduce(
+  (total, item) =>
+    total + Number(item.quantity) * Number(item.purchase_price),
+  0
+);
+
   return (
     <div className="container-fluid bg-dark text-white min-vh-100">
       <div className="row">
@@ -60,132 +137,68 @@ const addInventory = async () => {
         <Sidebar />
 
         <div className="col-md-10 p-4">
-          <h2>Inventory</h2>
+          <h2 className="mb-1">📦 Inventory Management</h2>
 
-<div className="card bg-secondary p-3 mt-3 mb-4">
-  <div className="row g-2">
+<p className="text-light mb-4">
+  Manage all hotel inventory items, suppliers and stock levels.
+</p>
 
-    <div className="col-md-3">
-      <input
-        type="text"
-        className="form-control"
-        placeholder="Item Name"
-        value={item_name}
-        onChange={(e) => setItemName(e.target.value)}
-      />
-    </div>
+<div className="row">
 
-    <div className="col-md-2">
-      <input
-        type="text"
-        className="form-control"
-        placeholder="Category"
-        value={category}
-        onChange={(e) => setCategory(e.target.value)}
-      />
-    </div>
+  <DashboardCard
+    title="Total Items"
+    value={totalItems}
+    bgColor="bg-primary"
+  />
 
-    <div className="col-md-1">
-      <input
-        type="number"
-        className="form-control"
-        placeholder="Qty"
-        value={quantity}
-        onChange={(e) => setQuantity(e.target.value)}
-      />
-    </div>
+  <DashboardCard
+    title="Low Stock"
+    value={lowStockItems}
+    bgColor="bg-danger"
+  />
 
-    <div className="col-md-2">
-      <input
-        type="text"
-        className="form-control"
-        placeholder="Unit"
-        value={unit}
-        onChange={(e) => setUnit(e.target.value)}
-      />
-    </div>
+  <DashboardCard
+    title="Categories"
+    value={totalCategories}
+    bgColor="bg-success"
+  />
 
-    <div className="col-md-2">
-      <input
-        type="number"
-        className="form-control"
-        placeholder="Purchase Price"
-        value={purchase_price}
-        onChange={(e) => setPurchasePrice(e.target.value)}
-      />
-    </div>
+  <DashboardCard
+    title="Stock Value"
+    value={`₦${totalStockValue.toLocaleString()}`}
+    bgColor="bg-warning"
+  />
 
-    <div className="col-md-2">
-      <input
-        type="number"
-        className="form-control"
-        placeholder="Selling Price"
-        value={selling_price}
-        onChange={(e) => setSellingPrice(e.target.value)}
-      />
-    </div>
-
-    <div className="col-md-3 mt-2">
-      <input
-        type="text"
-        className="form-control"
-        placeholder="Supplier"
-        value={supplier_name}
-        onChange={(e) => setSupplierName(e.target.value)}
-      />
-    </div>
-
-    <div className="col-md-2 mt-2">
-      <input
-        type="number"
-        className="form-control"
-        placeholder="Reorder Level"
-        value={reorder_level}
-        onChange={(e) => setReorderLevel(e.target.value)}
-      />
-    </div>
-
-    <div className="col-md-2 mt-2">
-      <button
-        className="btn btn-success w-100"
-        onClick={addInventory}
-      >
-        Add Item
-      </button>
-    </div>
-
-  </div>
 </div>
 
-          <table className="table table-dark table-striped mt-4">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Item</th>
-                <th>Category</th>
-                <th>Quantity</th>
-                <th>Unit</th>
-                <th>Purchase</th>
-                <th>Selling</th>
-              </tr>
-            </thead>
+<InventoryForm
+  item_name={item_name}
+  setItemName={setItemName}
+  category={category}
+  setCategory={setCategory}
+  quantity={quantity}
+  setQuantity={setQuantity}
+  unit={unit}
+  setUnit={setUnit}
+  purchase_price={purchase_price}
+  setPurchasePrice={setPurchasePrice}
+  selling_price={selling_price}
+  setSellingPrice={setSellingPrice}
+  supplier_name={supplier_name}
+  setSupplierName={setSupplierName}
+  reorder_level={reorder_level}
+  setReorderLevel={setReorderLevel}
+  addInventory={addInventory}
 
-            <tbody>
-              {items.map((item) => (
-                <tr key={item.id}>
-                  <td>{item.id}</td>
-                  <td>{item.item_name}</td>
-                  <td>{item.category}</td>
-                  <td>{item.quantity}</td>
-                  <td>{item.unit}</td>
-                  <td>{item.purchase_price}</td>
-                  <td>{item.selling_price}</td>
-                </tr>
-              ))}
-            </tbody>
+  editingId={editingId}
+  updateInventory={updateInventory}
+/>
 
-          </table>
-
+<InventoryTable
+  items={items}
+  deleteInventory={deleteInventory}
+  editInventory={editInventory}
+/>
         </div>
 
       </div>
