@@ -6,6 +6,7 @@ dotenv.config();
 
 const pool = require("./config/db");
 const inventoryRoutes = require("./routes/inventoryRoutes");
+const supplierRoutes = require("./routes/supplierRoutes");
 // console.log(inventoryRoutes);
 
 const app = express();
@@ -19,6 +20,9 @@ app.use((req, res, next) => {
 });
 
 app.use("/inventory", inventoryRoutes);
+app.use("/suppliers", supplierRoutes);
+console.log("Inventory route registered");
+console.log("Supplier route registered");
 // Test database connection
 app.get("/", async (req, res) => {
   try {
