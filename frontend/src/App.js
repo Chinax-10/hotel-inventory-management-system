@@ -1,8 +1,8 @@
 import "bootstrap/dist/css/bootstrap.min.css";
-import Inventory from "./pages/Inventory";
+import Categories from "./pages/Categories";
 
 function App() {
-  return <Inventory />;
+  return <Categories />;
 }
 
 export default App;
