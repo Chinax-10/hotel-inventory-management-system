@@ -6,6 +6,10 @@ dotenv.config();
 
 const pool = require("./config/db");
 const inventoryRoutes = require("./routes/inventoryRoutes");
+const supplierRoutes = require("./routes/supplierRoutes");
+const categoryRoutes = require("./routes/categoryRoutes");
+const purchaseRoutes = require("./routes/purchaseRoutes");
+const stockIssueRoutes = require("./routes/stockIssueRoutes");
 // console.log(inventoryRoutes);
 
 const app = express();
@@ -19,6 +23,14 @@ app.use((req, res, next) => {
 });
 
 app.use("/inventory", inventoryRoutes);
+app.use("/suppliers", supplierRoutes);
+app.use("/categories", categoryRoutes);
+app.use("/purchases", purchaseRoutes);
+app.use("/stock-issues", stockIssueRoutes);
+console.log("Inventory route registered");
+console.log("Supplier route registered");
+console.log("Category route registered");
+console.log("Purchase route registered");
 // Test database connection
 app.get("/", async (req, res) => {
   try {
