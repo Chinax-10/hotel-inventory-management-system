@@ -1,81 +1,168 @@
 # Bromford Hotel Inventory Management System
 
-A web-based inventory management system developed for Bromford Hotel, Owerri, Imo State.
+A web-based inventory management system developed as a 3MTT Software Development capstone project for managing hotel inventory operations.
 
-The system helps hotel staff manage inventory, suppliers, purchases, stock issues, approvals, users and reports from a centralized platform.
+The system provides a centralized platform for managing stock, suppliers, purchase requests, stock issues, approvals and users. It is designed to reduce manual inventory tracking, improve accountability and help hotel management maintain accurate stock records.
 
-## Features
+## Problem Statement
 
-### Authentication & Authorization
+Hotels handle different categories of items every day, including beverages, stationery, kitchen supplies and other operational materials.
+
+When inventory activities are handled manually, it can become difficult to:
+
+- Know the current quantity of available stock
+- Track purchases and stock additions
+- Track items issued to departments
+- Monitor low-stock items
+- Know who requested or approved a transaction
+- Maintain accurate inventory records
+- Prevent unauthorized stock changes
+
+The Bromford Hotel Inventory Management System provides a digital solution to these challenges.
+
+## Solution
+
+The system allows hotel staff to manage inventory from a centralized web application.
+
+Staff can submit purchase and stock issue requests, while authorized Managers and Administrators can review, approve or reject requests.
+
+Approved transactions automatically update inventory quantities, helping maintain more accurate stock records.
+
+## Key Features
+
+### 1. Authentication & Authorization
+
 - Secure user login
 - JWT-based authentication
 - Role-based access control
-- Admin, Manager and Storekeeper/Staff roles
 - Protected application routes
+- Administrator, Manager and Storekeeper/Staff roles
 - Logout functionality
 
-### Inventory Management
-- Add and manage inventory items
-- Track stock quantities
-- Monitor inventory levels
-- Category-based inventory organization
+### 2. Inventory Management
 
-### Supplier Management
-- Add and manage suppliers
-- Store supplier contact information
-- Link suppliers to purchases
+- Add inventory items
+- View inventory items
+- Track available quantities
+- Monitor stock levels
+- Set reorder levels
+- Organize items by category
+- Track purchase and selling prices
+- Associate items with suppliers
 
-### Purchase Management
+### 3. Supplier Management
+
+- Add suppliers
+- View supplier information
+- Store supplier company details
+- Link suppliers to inventory purchases
+
+### 4. Purchase Management
+
 - Submit purchase requests
+- View purchase records
+- Calculate purchase totals
+- Send purchase requests for approval
 - Manager/Admin approval workflow
-- Automatic stock increase after approval
-- Purchase history
-- Purchase amount calculations
+- Automatically increase inventory after an approved purchase
 
-### Stock Issue Management
+### 5. Stock Issue Management
+
 - Submit stock issue requests
+- Select inventory items
+- Specify quantity and department
+- Specify who the item is issued to
+- Add remarks/details
 - Manager/Admin approval workflow
-- Automatic stock deduction after approval
-- Stock issue history
+- Automatically reduce inventory after approval
+- View stock issue history
 
-### Approval Management
-- Managers and Administrators can review pending requests
-- Approve or reject purchase requests
-- Approve or reject stock issue requests
-- Approved transactions automatically update inventory
+### 6. Approval Center
 
-### Reports
-- Current stock reports
-- Purchase summaries
-- Stock issue summaries
-- Inventory transaction history
+Managers and Administrators can review pending requests.
 
-### User Management
-- Admin can create users
-- Assign system roles
-- View system users
+The Approval Center supports:
+
+- Pending purchase requests
+- Pending stock issue requests
+- Approving purchase requests
+- Rejecting purchase requests
+- Approving stock issue requests
+- Rejecting stock issue requests
+
+Approved transactions update the inventory automatically.
+
+### 7. Dashboard
+
+The dashboard provides a quick overview of the system, including:
+
+- Total inventory items
+- Current stock
+- Low-stock items
+- Stock value
+- Number of suppliers
+- Number of departments
+
+### 8. User Management
+
+Administrators can:
+
+- Create users
+- View users
+- Assign user roles
 - Delete users
-- Users cannot delete their own accounts
+- Manage system access
 
-### System Settings
-- Hotel information
+Users are protected by role-based permissions.
+
+### 9. System Settings
+
+Administrators can manage basic system information such as:
+
+- Hotel name
 - System name
 - Location
 - Currency
 - Default reorder level
-- Admin-only editing of system settings
 
 ## User Roles
 
-| Role | Access |
+| Role | Main Access |
 |---|---|
-| Administrator | Full system access, user management and system settings |
+| Administrator | Full system access, user management, approvals and system settings |
 | Manager | Inventory, suppliers, purchases, stock issues, reports and approvals |
 | Storekeeper/Staff | Inventory operations, purchase requests and stock issue requests |
+
+## Purchase Approval Workflow
+
+The purchase process follows this workflow:
+
+1. Storekeeper/Staff submits a purchase request.
+2. The request is saved with a `pending` status.
+3. Manager or Administrator reviews the request.
+4. The request can be approved or rejected.
+5. When approved, a purchase record is created.
+6. The purchased quantity is automatically added to inventory.
+7. The request status changes to `approved`.
+
+## Stock Issue Approval Workflow
+
+The stock issue process follows this workflow:
+
+1. Storekeeper/Staff selects an inventory item.
+2. Staff enters the quantity, department, recipient and other details.
+3. A stock issue request is created with a `pending` status.
+4. Manager or Administrator reviews the request.
+5. The request can be approved or rejected.
+6. When approved, the requested quantity is deducted from inventory.
+7. The request status changes to `approved`.
+
+This approval process helps prevent unauthorized changes to stock quantities.
 
 ## Technology Stack
 
 ### Frontend
+
 - React.js
 - React Router
 - Axios
@@ -83,32 +170,38 @@ The system helps hotel staff manage inventory, suppliers, purchases, stock issue
 - JavaScript
 
 ### Backend
+
 - Node.js
 - Express.js
-- JWT Authentication
 - REST API
+- JWT Authentication
+- JavaScript
 
 ### Database
+
 - PostgreSQL
 
-## Project Structure
+### Development Tools
+
+- Visual Studio Code
+- Git
+- GitHub
+- PostgreSQL / pgAdmin
+
+## System Architecture
+
+The application follows a frontend-backend-database architecture.
 
 ```text
-Bromford-Hotel-Inventory/
-│
-├── frontend/
-│   ├── src/
-│   │   ├── components/
-│   │   ├── pages/
-│   │   ├── services/
-│   │   ├── App.js
-│   │   └── ProtectedRoute.js
-│   └── package.json
-│
-└── server/
-    ├── controllers/
-    ├── routes/
-    ├── middleware/
-    ├── config/
-    ├── index.js
-    └── package.json
+User
+  |
+  v
+React Frontend
+  |
+  | HTTP / REST API
+  v
+Node.js + Express Backend
+  |
+  | SQL Queries
+  v
+PostgreSQL Database
