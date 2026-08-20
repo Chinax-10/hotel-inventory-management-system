@@ -18,6 +18,12 @@ function Purchases() {
   const [purchase_price, setPurchasePrice] = useState("");
   const [purchase_date, setPurchaseDate] = useState("");
 
+  const currentUser = JSON.parse(
+    localStorage.getItem("user") || "{}"
+  );
+
+  const isStorekeeper = currentUser.role === "staff";
+
   useEffect(() => {
     fetchPurchases();
     loadInventory();
@@ -59,54 +65,114 @@ function Purchases() {
     setPurchaseDate("");
   };
 
-  const addPurchase = async () => {
-    if (
-      !inventory_id ||
-      !supplier_id ||
-      !quantity ||
-      !purchase_price ||
-      !purchase_date
-    ) {
-      alert("Please complete all fields.");
-      return;
-    }
+  // Storekeeper submits a purchase request
+const requestPurchase = async () => {
+  if (
+    !inventory_id ||
+    !supplier_id ||
+    !quantity ||
+    !purchase_price ||
+    !purchase_date
+  ) {
+    alert("Please complete all fields.");
+    return;
+  }
 
-    try {
-      await purchaseService.addPurchase({
-        inventory_id,
-        supplier_id,
-        quantity,
-        purchase_price,
-        purchase_date,
-      });
+  try {
+    await api.post("/purchase-requests", {
+      item_id: inventory_id,
+      supplier_id,
+      quantity,
+      purchase_price,
+      purchase_date,
+    });
 
-      clearForm();
+    clearForm();
 
-      fetchPurchases();
-      loadInventory();
+    alert(
+      "Purchase request submitted successfully. Waiting for Manager/Admin approval."
+    );
+  } catch (error) {
+    console.error("PURCHASE REQUEST ERROR:", error);
+    console.error("SERVER RESPONSE:", error.response?.data);
 
-      alert("Purchase added successfully.");
+    alert(
+      error.response?.data?.message ||
+        error.response?.data?.error ||
+        `Request failed: ${error.message}`
+    );
+  }
+};
 
-    } catch (error) {
-      console.log(error);
-      alert("Unable to save purchase.");
-    }
-  };
 
-  const totalPurchases = purchases.length;
+// Manager/Admin can create a purchase directly
+const addPurchase = async () => {
+  if (
+    !inventory_id ||
+    !supplier_id ||
+    !quantity ||
+    !purchase_price ||
+    !purchase_date
+  ) {
+    alert("Please complete all fields.");
+    return;
+  }
+
+  try {
+    await purchaseService.addPurchase({
+      item_id: inventory_id,
+      supplier_id,
+      quantity,
+      purchase_price,
+      purchase_date,
+    });
+
+    clearForm();
+
+    fetchPurchases();
+    loadInventory();
+
+    alert("Purchase added successfully.");
+  } catch (error) {
+    console.error("PURCHASE ERROR:", error);
+    console.error("SERVER RESPONSE:", error.response?.data);
+
+    alert(
+      error.response?.data?.message ||
+        error.response?.data?.error ||
+        `Request failed: ${error.message}`
+    );
+  }
+};
+
+
+// Decide what happens when the form is submitted
+const handlePurchaseSubmit = () => {
+  if (isStorekeeper) {
+    requestPurchase();
+  } else {
+    addPurchase();
+  }
+};
+
+
+const totalPurchases = purchases.length;
 
   const totalQuantity = purchases.reduce(
-    (sum, purchase) => sum + Number(purchase.quantity),
+    (sum, purchase) =>
+      sum + Number(purchase.quantity),
     0
   );
 
   const totalSpent = purchases.reduce(
-    (sum, purchase) => sum + Number(purchase.total_amount),
+    (sum, purchase) =>
+      sum + Number(purchase.total_amount),
     0
   );
 
   return (
     <div className="container-fluid bg-dark text-white min-vh-100">
+
       <div className="row">
 
         <Sidebar />
@@ -118,7 +184,9 @@ function Purchases() {
           </h2>
 
           <p className="text-light mb-4">
-            Record inventory purchases and automatically update stock levels.
+            {isStorekeeper
+              ? "Submit inventory purchase requests for Manager/Admin approval."
+              : "Record inventory purchases and automatically update stock levels."}
           </p>
 
           <div className="row">
@@ -146,7 +214,8 @@ function Purchases() {
               value="Active"
               bgColor="bg-danger"
             />
-                      </div>
+
+          </div>
 
           <PurchaseForm
             inventoryItems={inventoryItems}
@@ -167,7 +236,13 @@ function Purchases() {
             purchase_date={purchase_date}
             setPurchaseDate={setPurchaseDate}
 
-            addPurchase={addPurchase}
+            addPurchase={handlePurchaseSubmit}
+
+            submitLabel={
+              isStorekeeper
+                ? "Request Purchase"
+                : "Save Purchase"
+            }
           />
 
           <PurchaseTable
@@ -177,6 +252,7 @@ function Purchases() {
         </div>
 
       </div>
+
     </div>
   );
 }

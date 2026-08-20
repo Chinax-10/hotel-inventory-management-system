@@ -18,12 +18,16 @@ function PurchaseForm({
   setPurchaseDate,
 
   addPurchase,
+
+  submitLabel = "Save Purchase",
 }) {
   return (
     <div className="card bg-secondary p-4 mt-3 mb-4 shadow">
 
       <h5 className="mb-3 text-white">
-        Add New Purchase
+        {submitLabel === "Request Purchase"
+          ? "Request New Purchase"
+          : "Add New Purchase"}
       </h5>
 
       <div className="row g-3">
@@ -40,7 +44,9 @@ function PurchaseForm({
             value={inventory_id}
             onChange={(e) => setInventoryId(e.target.value)}
           >
-            <option value="">Select Inventory Item</option>
+            <option value="">
+              Select Inventory Item
+            </option>
 
             {inventoryItems.map((item) => (
               <option
@@ -65,7 +71,9 @@ function PurchaseForm({
             value={supplier_id}
             onChange={(e) => setSupplierId(e.target.value)}
           >
-            <option value="">Select Supplier</option>
+            <option value="">
+              Select Supplier
+            </option>
 
             {suppliers.map((supplier) => (
               <option
@@ -87,6 +95,7 @@ function PurchaseForm({
 
           <input
             type="number"
+            min="1"
             className="form-control"
             placeholder="0"
             value={quantity}
@@ -103,10 +112,13 @@ function PurchaseForm({
 
           <input
             type="number"
+            min="0"
             className="form-control"
             placeholder="0"
             value={purchase_price}
-            onChange={(e) => setPurchasePrice(e.target.value)}
+            onChange={(e) =>
+              setPurchasePrice(e.target.value)
+            }
           />
         </div>
 
@@ -121,7 +133,9 @@ function PurchaseForm({
             type="date"
             className="form-control"
             value={purchase_date}
-            onChange={(e) => setPurchaseDate(e.target.value)}
+            onChange={(e) =>
+              setPurchaseDate(e.target.value)
+            }
           />
         </div>
 
@@ -133,10 +147,11 @@ function PurchaseForm({
           </label>
 
           <button
+            type="button"
             className="btn btn-success"
             onClick={addPurchase}
           >
-            Save Purchase
+            {submitLabel}
           </button>
         </div>
 

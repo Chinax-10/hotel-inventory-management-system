@@ -9,24 +9,31 @@ const inventoryRoutes = require("./routes/inventoryRoutes");
 const supplierRoutes = require("./routes/supplierRoutes");
 const categoryRoutes = require("./routes/categoryRoutes");
 const purchaseRoutes = require("./routes/purchaseRoutes");
+const purchaseRequestRoutes = require("./routes/purchaseRequestRoutes");
 const stockIssueRoutes = require("./routes/stockIssueRoutes");
+const authRoutes = require("./routes/authRoutes");
+const { authenticateToken } = require("./middleware/authMiddleware");
+const approvalRoutes = require("./routes/approvalRoutes");
 // console.log(inventoryRoutes);
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.use("/auth", authRoutes);
+app.use("/approvals", approvalRoutes);
 
 app.use((req, res, next) => {
   console.log("Incoming request:", req.method, req.originalUrl);
   next();
 });
 
-app.use("/inventory", inventoryRoutes);
-app.use("/suppliers", supplierRoutes);
-app.use("/categories", categoryRoutes);
-app.use("/purchases", purchaseRoutes);
-app.use("/stock-issues", stockIssueRoutes);
+app.use("/inventory", authenticateToken, inventoryRoutes);
+app.use("/suppliers", authenticateToken, supplierRoutes);
+app.use("/categories", authenticateToken, categoryRoutes);
+app.use("/purchases", authenticateToken, purchaseRoutes);
+app.use("/purchase-requests", purchaseRequestRoutes);
+app.use("/stock-issues", authenticateToken, stockIssueRoutes);
 console.log("Inventory route registered");
 console.log("Supplier route registered");
 console.log("Category route registered");
@@ -51,7 +58,7 @@ app.get("/", async (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {
   console.log("***** MY SERVER STARTED *****");
   console.log(`Server is running on port ${PORT}`);
 });

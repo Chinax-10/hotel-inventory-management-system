@@ -6,6 +6,15 @@ import DashboardCard from "../components/DashboardCard";
 import api from "../services/api";
 
 function Inventory() {
+    const currentUser = JSON.parse(
+    localStorage.getItem("user") || "{}"
+  );
+
+  const isAdmin = currentUser.role === "admin";
+  const isManager = currentUser.role === "manager";
+
+  const canEdit = isAdmin || isManager;
+  const canDelete = isAdmin;
   const [items, setItems] = useState([]);
 
 const [item_name, setItemName] = useState("");
@@ -198,6 +207,8 @@ const totalStockValue = items.reduce(
   items={items}
   deleteInventory={deleteInventory}
   editInventory={editInventory}
+  canEdit={canEdit}
+  canDelete={canDelete}
 />
         </div>
 

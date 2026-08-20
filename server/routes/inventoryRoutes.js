@@ -8,9 +8,26 @@ const {
   deleteInventory,
 } = require("../controllers/inventoryController");
 
-router.get("/", getAllInventory);
-router.post("/", addInventory);
-router.put("/:id", updateInventory);
-router.delete("/:id", deleteInventory);
+const {
+  authenticateToken,
+  requireAdmin,
+  requireManager,
+} = require("../middleware/authMiddleware");
+
+// VIEW INVENTORY
+// Staff, Manager and Admin
+router.get("/", authenticateToken, getAllInventory);
+
+// ADD INVENTORY
+// Staff, Manager and Admin
+router.post("/", authenticateToken, addInventory);
+
+// EDIT INVENTORY
+// Manager and Admin
+router.put("/:id", authenticateToken, requireManager, updateInventory);
+
+// DELETE INVENTORY
+// Admin ONLY
+router.delete("/:id", authenticateToken, requireAdmin, deleteInventory);
 
 module.exports = router;

@@ -1,31 +1,42 @@
 const pool = require("../config/db");
 
-// GET all stock issues
+console.log("🔥 NEW STOCK ISSUE CONTROLLER LOADED");
+
+// GET ALL STOCK ISSUE REQUESTS
 const getAllStockIssues = async (req, res) => {
   try {
     const result = await pool.query(`
       SELECT
-        stock_issues.*,
-        inventory.item_name
-      FROM stock_issues
-      JOIN inventory
-        ON stock_issues.inventory_id = inventory.id
-      ORDER BY stock_issues.id DESC
+        sr.id,
+        sr.item_id AS inventory_id,
+        i.item_name,
+        sr.quantity,
+        sr.status,
+        sr.reason AS remarks,
+        sr.created_at AS issue_date,
+        u.username AS requested_by
+      FROM stock_issue_requests sr
+      LEFT JOIN inventory i
+        ON sr.item_id = i.id
+      LEFT JOIN users u
+        ON sr.requested_by = u.id
+      ORDER BY sr.id DESC
     `);
 
     res.json(result.rows);
 
   } catch (error) {
-    console.error(error);
+    console.error("Get stock issue requests error:", error);
 
     res.status(500).json({
-      message: "Error fetching stock issues",
+      message: "Error fetching stock issue requests",
       error: error.message,
     });
   }
 };
 
-// ADD stock issue
+
+// CREATE STOCK ISSUE REQUEST
 const addStockIssue = async (req, res) => {
   try {
     const {
@@ -37,74 +48,89 @@ const addStockIssue = async (req, res) => {
       remarks,
     } = req.body;
 
-    // Check available stock
+    // Validate required fields
+    if (
+      !inventory_id ||
+      !quantity ||
+      !department ||
+      !issued_to ||
+      !issue_date
+    ) {
+      return res.status(400).json({
+        message: "Please complete all required fields.",
+      });
+    }
+
+    const requestedQuantity = Number(quantity);
+
+    if (requestedQuantity <= 0) {
+      return res.status(400).json({
+        message: "Quantity must be greater than zero.",
+      });
+    }
+
+    // Check inventory item
     const stock = await pool.query(
-      "SELECT quantity FROM inventory WHERE id = $1",
+      `SELECT id, item_name, quantity
+       FROM inventory
+       WHERE id = $1`,
       [inventory_id]
     );
 
     if (stock.rows.length === 0) {
       return res.status(404).json({
-        message: "Inventory item not found",
+        message: "Inventory item not found.",
       });
     }
 
-    const available = Number(stock.rows[0].quantity);
+    const availableStock = Number(stock.rows[0].quantity);
 
-    if (quantity > available) {
+    // Don't allow request above available stock
+    if (requestedQuantity > availableStock) {
       return res.status(400).json({
-        message: "Insufficient stock available",
+        message: `Insufficient stock. Available quantity: ${availableStock}.`,
       });
     }
 
+    // CREATE PENDING REQUEST
+    // IMPORTANT: inventory is NOT reduced here.
     const result = await pool.query(
       `
-      INSERT INTO stock_issues
+      INSERT INTO stock_issue_requests
       (
-        inventory_id,
-        department,
-        issued_to,
+        item_id,
         quantity,
-        issue_date,
-        remarks
+        requested_by,
+        status,
+        reason
       )
-      VALUES ($1,$2,$3,$4,$5,$6)
+      VALUES ($1, $2, $3, 'pending', $4)
       RETURNING *
       `,
       [
         inventory_id,
-        department,
-        issued_to,
-        quantity,
-        issue_date,
-        remarks,
+        requestedQuantity,
+        req.user.id,
+        `Department: ${department} | Issued to: ${issued_to} | Date: ${issue_date}${remarks ? ` | Remarks: ${remarks}` : ""}`,
       ]
     );
 
-    // Reduce inventory quantity
-    await pool.query(
-      `
-      UPDATE inventory
-      SET quantity = quantity - $1
-      WHERE id = $2
-      `,
-      [quantity, inventory_id]
-    );
-
     res.status(201).json({
-      message: "Stock issued successfully",
-      issue: result.rows[0],
+      message: "Stock issue request submitted for approval.",
+      request: result.rows[0],
+      available_stock: availableStock,
     });
 
   } catch (error) {
-    console.error(error);
+    console.error("Add stock issue request error:", error);
 
     res.status(500).json({
-      message: "Error issuing stock",
+      message: "Error submitting stock issue request.",
       error: error.message,
     });
   }
 };
+
 
 module.exports = {
   getAllStockIssues,

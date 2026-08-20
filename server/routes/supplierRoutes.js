@@ -8,16 +8,26 @@ const {
   deleteSupplier,
 } = require("../controllers/supplierController");
 
-// GET all suppliers
-router.get("/", getAllSuppliers);
+const {
+  authenticateToken,
+  requireAdmin,
+  requireManager,
+} = require("../middleware/authMiddleware");
 
-// POST new supplier
-router.post("/", addSupplier);
+// VIEW SUPPLIERS
+// Staff, Manager and Admin
+router.get("/", authenticateToken, getAllSuppliers);
 
-// PUT update supplier
-router.put("/:id", updateSupplier);
+// ADD SUPPLIER
+// Manager and Admin
+router.post("/", authenticateToken, requireManager, addSupplier);
 
-// DELETE supplier
-router.delete("/:id", deleteSupplier);
+// UPDATE SUPPLIER
+// Manager and Admin
+router.put("/:id", authenticateToken, requireManager, updateSupplier);
+
+// DELETE SUPPLIER
+// Admin ONLY
+router.delete("/:id", authenticateToken, requireAdmin, deleteSupplier);
 
 module.exports = router;

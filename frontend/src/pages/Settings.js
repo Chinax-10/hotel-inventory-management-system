@@ -2,6 +2,9 @@ import { useState } from "react";
 import Sidebar from "../components/Sidebar";
 
 function Settings() {
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const isAdmin = user.role === "admin";
+
   const [hotelName, setHotelName] = useState(
     localStorage.getItem("hotelName") || "Bromford Hotel"
   );
@@ -26,6 +29,8 @@ function Settings() {
   const [saved, setSaved] = useState(false);
 
   const saveSettings = () => {
+    if (!isAdmin) return;
+
     localStorage.setItem("hotelName", hotelName);
     localStorage.setItem("systemName", systemName);
     localStorage.setItem("location", location);
@@ -50,8 +55,16 @@ function Settings() {
           <h2 className="mb-1">⚙️ Settings</h2>
 
           <p className="text-light mb-4">
-            Manage system information and hotel inventory settings.
+            {isAdmin
+              ? "Manage system information and hotel inventory settings."
+              : "View system information and hotel inventory settings."}
           </p>
+
+          {!isAdmin && (
+            <div className="alert alert-warning">
+              🔒 Only Administrators can modify system settings.
+            </div>
+          )}
 
           {/* HOTEL INFORMATION */}
           <div className="card bg-secondary p-4 mb-4">
@@ -70,6 +83,7 @@ function Settings() {
                   className="form-control"
                   value={hotelName}
                   onChange={(e) => setHotelName(e.target.value)}
+                  readOnly={!isAdmin}
                 />
               </div>
 
@@ -83,6 +97,7 @@ function Settings() {
                   className="form-control"
                   value={systemName}
                   onChange={(e) => setSystemName(e.target.value)}
+                  readOnly={!isAdmin}
                 />
               </div>
 
@@ -96,6 +111,7 @@ function Settings() {
                   className="form-control"
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
+                  readOnly={!isAdmin}
                 />
               </div>
 
@@ -135,6 +151,7 @@ function Settings() {
                   value={reorderLevel}
                   onChange={(e) => setReorderLevel(e.target.value)}
                   min="0"
+                  readOnly={!isAdmin}
                 />
 
               </div>
@@ -149,6 +166,7 @@ function Settings() {
                   className="form-select"
                   value={currency}
                   onChange={(e) => setCurrency(e.target.value)}
+                  disabled={!isAdmin}
                 >
                   <option value="₦">Nigerian Naira (₦)</option>
                   <option value="$">US Dollar ($)</option>
@@ -162,23 +180,25 @@ function Settings() {
 
           </div>
 
-          {/* SAVE BUTTON */}
-          <div className="card bg-secondary p-4 mb-4">
+          {/* SAVE BUTTON - ADMIN ONLY */}
+          {isAdmin && (
+            <div className="card bg-secondary p-4 mb-4">
 
-            <button
-              className="btn btn-success btn-lg"
-              onClick={saveSettings}
-            >
-              💾 Save Settings
-            </button>
+              <button
+                className="btn btn-success btn-lg"
+                onClick={saveSettings}
+              >
+                💾 Save Settings
+              </button>
 
-            {saved && (
-              <div className="alert alert-success mt-3 mb-0">
-                Settings saved successfully.
-              </div>
-            )}
+              {saved && (
+                <div className="alert alert-success mt-3 mb-0">
+                  Settings saved successfully.
+                </div>
+              )}
 
-          </div>
+            </div>
+          )}
 
           {/* SYSTEM MODULES */}
           <div className="card bg-secondary p-4 mb-4">
@@ -189,37 +209,27 @@ function Settings() {
 
               <div className="list-group-item bg-dark text-white d-flex justify-content-between">
                 Inventory Management
-                <span className="badge bg-success">
-                  Active
-                </span>
+                <span className="badge bg-success">Active</span>
               </div>
 
               <div className="list-group-item bg-dark text-white d-flex justify-content-between">
                 Supplier Management
-                <span className="badge bg-success">
-                  Active
-                </span>
+                <span className="badge bg-success">Active</span>
               </div>
 
               <div className="list-group-item bg-dark text-white d-flex justify-content-between">
                 Purchase Management
-                <span className="badge bg-success">
-                  Active
-                </span>
+                <span className="badge bg-success">Active</span>
               </div>
 
               <div className="list-group-item bg-dark text-white d-flex justify-content-between">
                 Stock Issues
-                <span className="badge bg-success">
-                  Active
-                </span>
+                <span className="badge bg-success">Active</span>
               </div>
 
               <div className="list-group-item bg-dark text-white d-flex justify-content-between">
                 Reports
-                <span className="badge bg-success">
-                  Active
-                </span>
+                <span className="badge bg-success">Active</span>
               </div>
 
             </div>

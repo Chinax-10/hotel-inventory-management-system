@@ -2,6 +2,8 @@ function InventoryTable({
   items,
   deleteInventory,
   editInventory,
+  canEdit,
+  canDelete,
 }) {
   return (
     <table className="table table-dark table-striped mt-4">
@@ -34,19 +36,23 @@ function InventoryTable({
             <td>{item.reorder_level}</td>
 
             <td>
-              <button
-  className="btn btn-warning btn-sm me-2"
-  onClick={() => editInventory(item)}
->
-  Edit
-</button>
+              {canEdit && (
+                <button
+                  className="btn btn-warning btn-sm me-2"
+                  onClick={() => editInventory(item)}
+                >
+                  Edit
+                </button>
+              )}
 
-              <button
-                className="btn btn-danger btn-sm"
-                onClick={() => deleteInventory(item.id)}
-              >
-                Delete
-              </button>
+              {canDelete && (
+                <button
+                  className="btn btn-danger btn-sm"
+                  onClick={() => deleteInventory(item.id)}
+                >
+                  Delete
+                </button>
+              )}
             </td>
           </tr>
         ))}

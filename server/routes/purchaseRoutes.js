@@ -6,10 +6,16 @@ const {
   addPurchase,
 } = require("../controllers/purchaseController");
 
-// GET all purchases
-router.get("/", getAllPurchases);
+const {
+  authenticateToken,
+} = require("../middleware/authMiddleware");
 
-// ADD purchase
-router.post("/", addPurchase);
+// VIEW PURCHASES
+// Staff, Manager and Admin
+router.get("/", authenticateToken, getAllPurchases);
+
+// CREATE PURCHASE
+// Staff, Manager and Admin
+router.post("/", authenticateToken, addPurchase);
 
 module.exports = router;

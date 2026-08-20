@@ -31,7 +31,6 @@ const getAllPurchases = async (req, res) => {
 // ADD purchase
 const addPurchase = async (req, res) => {
   try {
-
     const {
       inventory_id,
       supplier_id,
@@ -40,49 +39,56 @@ const addPurchase = async (req, res) => {
       purchase_date,
     } = req.body;
 
-    const total_amount = quantity * purchase_price;
+    if (
+      !inventory_id ||
+      !supplier_id ||
+      !quantity ||
+      !purchase_price ||
+      !purchase_date
+    ) {
+      return res.status(400).json({
+        message: "All purchase fields are required.",
+      });
+    }
+
+    const total_amount =
+      Number(quantity) * Number(purchase_price);
 
     const result = await pool.query(
-      `INSERT INTO purchases
+      `INSERT INTO purchase_requests
       (
-        inventory_id,
-        supplier_id,
+        item_id,
         quantity,
+        requested_by,
+        supplier_id,
         purchase_price,
+        purchase_date,
         total_amount,
-        purchase_date
+        status
       )
-      VALUES ($1,$2,$3,$4,$5,$6)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,'pending')
       RETURNING *`,
       [
         inventory_id,
-        supplier_id,
         quantity,
+        req.user.id,
+        supplier_id,
         purchase_price,
-        total_amount,
         purchase_date,
+        total_amount,
       ]
     );
 
-    // Automatically increase stock
-    await pool.query(
-      `UPDATE inventory
-       SET quantity = quantity + $1
-       WHERE id = $2`,
-      [quantity, inventory_id]
-    );
-
     res.status(201).json({
-      message: "Purchase added successfully",
-      purchase: result.rows[0],
+      message: "Purchase request submitted for approval.",
+      request: result.rows[0],
     });
 
   } catch (error) {
-
-    console.error(error);
+    console.error("Purchase request error:", error);
 
     res.status(500).json({
-      message: "Error adding purchase",
+      message: "Error submitting purchase request.",
       error: error.message,
     });
   }

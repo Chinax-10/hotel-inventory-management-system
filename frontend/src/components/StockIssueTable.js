@@ -5,33 +5,46 @@ function StockIssueTable({ issues }) {
         <tr>
           <th>ID</th>
           <th>Item</th>
-          <th>Department</th>
-          <th>Issued To</th>
           <th>Quantity</th>
-          <th>Issue Date</th>
-          <th>Remarks</th>
+          <th>Status</th>
+          <th>Requested By</th>
+          <th>Details</th>
         </tr>
       </thead>
 
       <tbody>
         {issues.length === 0 ? (
           <tr>
-            <td colSpan="7" className="text-center">
-              No stock issues found
+            <td colSpan="6" className="text-center">
+              No stock issue requests found
             </td>
           </tr>
         ) : (
           issues.map((issue) => (
             <tr key={issue.id}>
               <td>{issue.id}</td>
+
               <td>{issue.item_name}</td>
-              <td>{issue.department}</td>
-              <td>{issue.issued_to}</td>
+
               <td>{issue.quantity}</td>
+
               <td>
-                {new Date(issue.issue_date).toLocaleDateString("en-GB")}
+                <span
+                  className={
+                    issue.status === "approved"
+                      ? "badge bg-success"
+                      : issue.status === "rejected"
+                      ? "badge bg-danger"
+                      : "badge bg-warning text-dark"
+                  }
+                >
+                  {issue.status}
+                </span>
               </td>
-              <td>{issue.remarks}</td>
+
+              <td>{issue.requested_by || "N/A"}</td>
+
+              <td>{issue.remarks || "N/A"}</td>
             </tr>
           ))
         )}

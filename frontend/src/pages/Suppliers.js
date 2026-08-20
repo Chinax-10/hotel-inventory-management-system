@@ -6,6 +6,15 @@ import SupplierTable from "../components/SupplierTable";
 import supplierService from "../services/supplierService";
 
 function Suppliers() {
+    const currentUser = JSON.parse(
+    localStorage.getItem("user") || "{}"
+  );
+
+  const isAdmin = currentUser.role === "admin";
+  const isManager = currentUser.role === "manager";
+
+  const canEdit = isAdmin || isManager;
+  const canDelete = isAdmin;
   const [suppliers, setSuppliers] = useState([]);
 
   const [company_name, setCompanyName] = useState("");
@@ -168,10 +177,12 @@ function Suppliers() {
           />
 
           <SupplierTable
-            suppliers={suppliers}
-            editSupplier={editSupplier}
-            deleteSupplier={deleteSupplier}
-          />
+  suppliers={suppliers}
+  editSupplier={editSupplier}
+  deleteSupplier={deleteSupplier}
+  canEdit={canEdit}
+  canDelete={canDelete}
+/>
 
         </div>
 

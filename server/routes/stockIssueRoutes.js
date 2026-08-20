@@ -6,10 +6,16 @@ const {
   addStockIssue,
 } = require("../controllers/stockIssueController");
 
-// GET all stock issues
-router.get("/", getAllStockIssues);
+const {
+  authenticateToken,
+} = require("../middleware/authMiddleware");
 
-// ADD stock issue
-router.post("/", addStockIssue);
+// VIEW STOCK ISSUES
+// Staff, Manager and Admin
+router.get("/", authenticateToken, getAllStockIssues);
+
+// CREATE STOCK ISSUE
+// Staff, Manager and Admin
+router.post("/", authenticateToken, addStockIssue);
 
 module.exports = router;

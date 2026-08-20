@@ -8,16 +8,26 @@ const {
   deleteCategory,
 } = require("../controllers/categoryController");
 
-// GET all categories
-router.get("/", getAllCategories);
+const {
+  authenticateToken,
+  requireAdmin,
+  requireManager,
+} = require("../middleware/authMiddleware");
 
-// ADD category
-router.post("/", addCategory);
+// VIEW CATEGORIES
+// Staff, Manager and Admin
+router.get("/", authenticateToken, getAllCategories);
 
-// UPDATE category
-router.put("/:id", updateCategory);
+// ADD CATEGORY
+// Manager and Admin
+router.post("/", authenticateToken, requireManager, addCategory);
 
-// DELETE category
-router.delete("/:id", deleteCategory);
+// UPDATE CATEGORY
+// Manager and Admin
+router.put("/:id", authenticateToken, requireManager, updateCategory);
+
+// DELETE CATEGORY
+// Admin ONLY
+router.delete("/:id", authenticateToken, requireAdmin, deleteCategory);
 
 module.exports = router;

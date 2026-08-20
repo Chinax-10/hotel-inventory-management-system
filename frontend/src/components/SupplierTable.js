@@ -2,6 +2,8 @@ function SupplierTable({
   suppliers,
   editSupplier,
   deleteSupplier,
+  canEdit,
+  canDelete,
 }) {
   return (
     <table className="table table-dark table-striped">
@@ -20,7 +22,7 @@ function SupplierTable({
 
       <tbody>
 
-        {suppliers.map((supplier)=>(
+        {suppliers.map((supplier) => (
           <tr key={supplier.id}>
 
             <td>{supplier.id}</td>
@@ -32,19 +34,23 @@ function SupplierTable({
 
             <td>
 
-              <button
-                className="btn btn-warning btn-sm me-2"
-                onClick={()=>editSupplier(supplier)}
-              >
-                Edit
-              </button>
+              {canEdit && (
+                <button
+                  className="btn btn-warning btn-sm me-2"
+                  onClick={() => editSupplier(supplier)}
+                >
+                  Edit
+                </button>
+              )}
 
-              <button
-                className="btn btn-danger btn-sm"
-                onClick={()=>deleteSupplier(supplier.id)}
-              >
-                Delete
-              </button>
+              {canDelete && (
+                <button
+                  className="btn btn-danger btn-sm"
+                  onClick={() => deleteSupplier(supplier.id)}
+                >
+                  Delete
+                </button>
+              )}
 
             </td>
 

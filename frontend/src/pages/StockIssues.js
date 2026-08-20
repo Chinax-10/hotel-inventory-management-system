@@ -50,8 +50,9 @@ function StockIssues() {
         remarks,
       });
 
-      alert("Stock issued successfully.");
-
+      alert(
+  "Stock issue request submitted successfully. Waiting for Manager/Admin approval."
+);
       fetchIssues();
 
       setInventoryId("");
